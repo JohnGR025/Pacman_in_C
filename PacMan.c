@@ -1,0 +1,255 @@
+/*Libraries*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+/*Constants*/
+#define ROWS 11
+#define COLS 19
+
+/*Functions Prototypes*/
+void area(char board[][19], int ghosts[], int num);
+void preparing_board(char board[][19], int ghosts[], int pacman[], int num);
+void move_pacman(char board[][19],int pacman[]);
+void move_ghosts(char board[][19], int ghosts[], int pacman[], int num);
+int alive(int pacman[], int ghosts[], int num);
+
+int main(void)
+{
+    srand(time(NULL));
+    /*Variables Declaration*/
+    /*Useful stuff*/
+    int option, difficulty=2, moves=0;
+    /*The characters*/
+    int ghosts[6], pacman[2]={7, 9};
+    /*The Board Game*/
+    char board[ROWS][COLS]={
+        {'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b'},
+        {'b', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'b'},
+        {'b', 'o', 'b', 'b', 'o', 'b', 'o', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'o', 'b', 'b', 'o', 'b'},
+        {'b', 'o', 'o', 'o', 'o', 'b', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'b'},
+        {'b', 'b', 'b', 'b', 'o', 'b', 'o', 'b', 'o', 'b', 'o', 'b', 'o', 'b', 'o', 'b', 'b', 'b', 'b'},
+        {'t', 'o', 'o', 'o', 'o', 'b', 'o', 'b', 'o', 'o', 'o', 'b', 'o', 'b', 'o', 'o', 'o', 'o', 't'},
+        {'b', 'b', 'b', 'b', 'o', 'b', 'o', 'b', 'b', 'b', 'b', 'b', 'o', 'b', 'o', 'b', 'b', 'b', 'b'},
+        {'b', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'p', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'b'},
+        {'b', 'o', 'b', 'b', 'b', 'b', 'b', 'o', 'b', 'b', 'b', 'o', 'b', 'b', 'b', 'b', 'b', 'o', 'b'},
+        {'b', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'b', 'o', 'b', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'b'},
+        {'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b'}
+    };
+
+    /*Menu*/
+    printf("*****PAC MAN*****\n\n");
+    printf("Welcome Player!!!\n");
+    do 
+    {
+        do
+        {
+            printf("1) Play\n");
+            printf("2) Settings\n");
+            printf("3) Quit\n");
+            printf("Choose an option: ");
+            scanf("%d", &option);
+        } while (option<1 || option>3);
+
+        switch (option)
+        {
+        case 1: /*PLay*/
+            /*Printing the game board*/
+            preparing_board(board, ghosts, pacman, difficulty);
+
+            do
+            {
+                area(board, ghosts, difficulty);
+                move_pacman(board, pacman);
+                if (!alive(pacman, ghosts, difficulty))
+                    break;
+                move_ghosts(board, ghosts, pacman, difficulty);
+            } while (alive(pacman, ghosts, difficulty));
+            
+            printf("You Died!!!\n");
+        break;
+        
+        case 2: /*Settings*/
+            do
+            {
+                printf("Choose difficulty: ");
+                scanf("%d", &difficulty);
+            } while (difficulty<1 || difficulty>3);
+            printf("\n");
+        break;
+        }
+    } while (option!=3);
+
+    printf("You manage to move %d\n", moves);
+    return 0;
+}
+
+/*Function Factory*/
+void area(char board[][19], int ghosts[], int num)
+{
+    int i, j;
+
+    for (i = 0; i < 11; i++)
+    {
+        for (j = 0; j < 19; j++)
+        {
+            switch (board[i][j])
+            {
+            case 'b':
+                printf("%c", '%');
+            break;
+
+            case 'o':
+                printf(" ");
+            break;
+
+            case 'g':
+                printf("G");
+            break;
+
+            case 'p':
+                printf("C");
+            break;
+            }
+        }
+        printf("\n");
+    }
+    
+}
+
+void preparing_board(char board[][19], int ghosts[], int pacman[], int num)
+{
+    int i;
+
+    for (i = 0; i < num*2; i+=2)
+    {
+        do
+        {
+            ghosts[i] = rand()%ROWS;
+            ghosts[i+1] = rand()%COLS;
+        } while ((board[ghosts[i]][ghosts[i+1]]=='b') || (ghosts[i]==7) || (ghosts[i+1]==9));
+        board[ghosts[i]][ghosts[i+1]] = 'g';
+    }
+    pacman[0] = 7;
+    pacman[1] = 9;
+    
+}
+
+void move_pacman(char board[][19], int pacman[])
+{
+    char move;
+    int flag=1, temp1=pacman[0], temp2=pacman[1];
+    do
+    {
+        printf("Give direction (w,a,s,d): ");
+        scanf("%c", &move);
+        if ((move=='w') || (move=='a') || (move=='s') || (move=='d'))
+            flag = 0;
+        
+    } while (flag);
+    
+    switch (move)
+    {
+    case 'w': /*Up*/
+        if (pacman[0]-1>0)
+            pacman[0]--;
+    break;
+    
+    case 'a': /*Left*/
+        if (pacman[1]-1>0)
+        {
+            if (board[pacman[0]][pacman[1]-1]=='t')
+            pacman[1] = 17;
+            else if (board[pacman[0]][pacman[1]-1]!='b')
+                pacman[1]--;
+        }
+    break;
+
+    case 's': /*Down*/
+        if (pacman[0]+1<ROWS)
+            pacman[0]++;
+    break;
+
+    case 'd': /*Right*/
+        if (pacman[1]+1<COLS)
+        {
+            if (board[pacman[0]][pacman[1]+1]=='t')
+                pacman[1] = 1;
+            else if (board[pacman[0]][pacman[1]+1]!='b')
+            pacman[1]++;
+        }
+    break;
+    }
+    board[temp1][temp2] = 'o';
+    board[pacman[0]][pacman[1]] = 'p';
+}
+
+void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
+{
+    int i, move, direction, flag, temp;
+    int temp1, temp2;
+
+    for (i = 0; i < num*2; i+=2)
+    {
+        temp1 = ghosts[i];
+        temp2 = ghosts[i+1];
+        /*If pacman out of "vision"*/
+        if ((ghosts[i]!=pacman[0]) && (ghosts[i+1]!=pacman[1]))
+        {
+            do
+            {
+                flag = 0;
+
+                move = rand()%2;
+                direction = (rand()%3)-1;
+                temp = ghosts[move+i]+direction;
+
+                if (move==0)
+                {
+                    if ((temp<=0) || (temp>=ROWS))
+                        flag = 1;
+                }
+                else
+                    if ((temp<=0) || (temp>=COLS))
+                        flag = 1;
+                        
+                if (flag==1)
+                    continue;
+
+                if (move==0)
+                {
+                    if (board[temp][ghosts[i+1]]!='o')
+                        flag = 1;
+                }
+                else
+                    if (board[ghosts[i]][temp]!='o')
+                        flag = 1;
+            } while (flag);
+        }
+        /*Pacman is in the same colm or row as a ghost*/
+        else
+        {
+            if ((ghosts[i]==pacman[0])) /*Same Row*/
+                {
+                    if ()
+                }
+        }
+
+        ghosts[move+i] += direction;
+        board[temp1][temp2] = 'o';
+        if (move==0)
+            board[temp][ghosts[i+1]] = 'g';
+        else
+            board[ghosts[i]][temp] = 'g';
+    }
+}
+
+int alive(int pacman[], int ghosts[], int num)
+{
+    int i;
+    for (i = 0; i < num*2; i++)
+        if ((pacman[0]==ghosts[i]) && (pacman[1]==ghosts[i+1]))
+            return 0; 
+    
+    return 1;
+}
