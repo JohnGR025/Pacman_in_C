@@ -193,48 +193,71 @@ void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
     {
         temp1 = ghosts[i];
         temp2 = ghosts[i+1];
-        /*If pacman out of "vision"*/
-        if ((ghosts[i]!=pacman[0]) && (ghosts[i+1]!=pacman[1]))
+        /*Chase Sequence*/
+        /*Move towards pacman*/
+        /*Same Row*/
+        if ((pacman[1]<ghosts[i+1]) && ((ghosts[i+1]-1)=="o"))
+        {    
+            ghosts[i+1] -= 1;
+            board[temp1][temp2] = 'o';
+            board[temp][ghosts[i+1]] = 'g';
+            continue;
+        }
+        else if ((pacman[1]>ghosts[i+1]) && ((ghosts[i+1]+1)=="o"))
         {
-            do
+            ghosts[i+1] += 1;
+            board[temp1][temp2] = 'o';
+            board[temp][ghosts[i+1]] = 'g';
+            continue;
+        }
+        /*Same Column*/
+        if ((pacman[0]<ghosts[i]) && ((ghosts[i]-1)=="o"))
+        {    
+            ghosts[i] -= 1;
+            board[temp1][temp2] = 'o';
+            board[ghosts[i]][temp] = "g";
+            continue;
+        }
+        else if ((pacman[0]>ghosts[i]) && ((ghosts[i]+1)=="o"))
+        {
+            ghosts[i] += 1;
+            board[temp1][temp2] = 'o';
+            board[ghosts[i]][temp] = 'g';
+            continue;
+        }
+        
+        /*Movement*/
+        do
+        {
+            flag = 0;
+
+            move = rand()%2;
+            direction = (rand()%3)-1;
+            temp = ghosts[move+i]+direction;
+
+            if (move==0)
             {
-                flag = 0;
+                if ((temp<=0) || (temp>=ROWS))
+                    flag = 1;
+            }
+            else
+                if ((temp<=0) || (temp>=COLS))
+                    flag = 1;
+                    
+            if (flag==1)
+                continue;
 
-                move = rand()%2;
-                direction = (rand()%3)-1;
-                temp = ghosts[move+i]+direction;
+            if (move==0)
+            {
+                if (board[temp][ghosts[i+1]]!='o')
+                    flag = 1;
+            }
+            else
+                if (board[ghosts[i]][temp]!='o')
+                    flag = 1;
+        } while (flag);
 
-                if (move==0)
-                {
-                    if ((temp<=0) || (temp>=ROWS))
-                        flag = 1;
-                }
-                else
-                    if ((temp<=0) || (temp>=COLS))
-                        flag = 1;
-                        
-                if (flag==1)
-                    continue;
-
-                if (move==0)
-                {
-                    if (board[temp][ghosts[i+1]]!='o')
-                        flag = 1;
-                }
-                else
-                    if (board[ghosts[i]][temp]!='o')
-                        flag = 1;
-            } while (flag);
-        }
-        /*Pacman is in the same colm or row as a ghost*/
-        else
-        {
-            if ((ghosts[i]==pacman[0])) /*Same Row*/
-                {
-                    if ()
-                }
-        }
-
+        /*Finilizing the changes (movements)*/
         ghosts[move+i] += direction;
         board[temp1][temp2] = 'o';
         if (move==0)
