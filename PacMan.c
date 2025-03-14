@@ -26,11 +26,11 @@ int main(void)
     char board[ROWS][COLS]={
         {'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b'},
         {'b', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'b'},
-        {'b', 'o', 'b', 'b', 'o', 'b', 'o', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'o', 'b', 'b', 'o', 'b'},
-        {'b', 'o', 'o', 'o', 'o', 'b', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'b'},
-        {'b', 'b', 'b', 'b', 'o', 'b', 'o', 'b', 'o', 'b', 'o', 'b', 'o', 'b', 'o', 'b', 'b', 'b', 'b'},
-        {'t', 'o', 'o', 'o', 'o', 'b', 'o', 'b', 'o', 'o', 'o', 'b', 'o', 'b', 'o', 'o', 'o', 'o', 't'},
-        {'b', 'b', 'b', 'b', 'o', 'b', 'o', 'b', 'b', 'b', 'b', 'b', 'o', 'b', 'o', 'b', 'b', 'b', 'b'},
+        {'b', 'o', 'b', 'o', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'o', 'b', 'o', 'b'},
+        {'b', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'b', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'b'},
+        {'b', 'b', 'b', 'o', 'b', 'b', 'o', 'b', 'o', 'o', 'o', 'b', 'o', 'b', 'b', 'o', 'b', 'b', 'b'},
+        {'t', 'o', 'o', 'o', 'o', 'o', 'o', 'b', 'o', 'o', 'o', 'b', 'o', 'o', 'o', 'o', 'o', 'o', 't'},
+        {'b', 'b', 'b', 'o', 'b', 'b', 'o', 'b', 'b', 'b', 'b', 'b', 'o', 'b', 'b', 'o', 'b', 'b', 'b'},
         {'b', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'p', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'b'},
         {'b', 'o', 'b', 'b', 'b', 'b', 'b', 'o', 'b', 'b', 'b', 'o', 'b', 'b', 'b', 'b', 'b', 'o', 'b'},
         {'b', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'b', 'o', 'b', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'b'},
@@ -38,7 +38,7 @@ int main(void)
     };
 
     /*Menu*/
-    printf("*****PAC MAN*****\n\n");
+    printf("\n*****PAC MAN*****\n\n");
     printf("Welcome Player!!!\n");
     do 
     {
@@ -100,6 +100,7 @@ void area(char board[][19], int ghosts[], int num)
             break;
 
             case 'o':
+            case 't':
                 printf(" ");
             break;
 
@@ -152,14 +153,15 @@ void move_pacman(char board[][19], int pacman[])
     {
     case 'w': /*Up*/
         if (pacman[0]-1>0)
-            pacman[0]--;
+            if (board[pacman[0]-1][pacman[1]]!='b')
+                pacman[0]--;
     break;
     
     case 'a': /*Left*/
-        if (pacman[1]-1>0)
+        if (pacman[1]-1>=0)
         {
             if (board[pacman[0]][pacman[1]-1]=='t')
-            pacman[1] = 17;
+                pacman[1] = 17;
             else if (board[pacman[0]][pacman[1]-1]!='b')
                 pacman[1]--;
         }
@@ -167,21 +169,23 @@ void move_pacman(char board[][19], int pacman[])
 
     case 's': /*Down*/
         if (pacman[0]+1<ROWS)
-            pacman[0]++;
+            if (board[pacman[0]+1][pacman[1]]!='b')
+               pacman[0]++;
     break;
 
     case 'd': /*Right*/
-        if (pacman[1]+1<COLS)
+        if (pacman[1]+1<=COLS)
         {
             if (board[pacman[0]][pacman[1]+1]=='t')
                 pacman[1] = 1;
             else if (board[pacman[0]][pacman[1]+1]!='b')
-            pacman[1]++;
+                pacman[1]++;
         }
     break;
     }
     board[temp1][temp2] = 'o';
     board[pacman[0]][pacman[1]] = 'p';
+    printf("Row: %d\nCol: %d\n", pacman[0], pacman[1]);
 }
 
 void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
@@ -196,14 +200,14 @@ void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
         /*Chase Sequence*/
         /*Move towards pacman*/
         /*Same Row*/
-        if ((pacman[1]<ghosts[i+1]) && ((ghosts[i+1]-1)=="o"))
+        if ((pacman[1]<ghosts[i+1]) && ((ghosts[i+1]-1)=='o'))
         {    
             ghosts[i+1] -= 1;
             board[temp1][temp2] = 'o';
             board[temp][ghosts[i+1]] = 'g';
             continue;
         }
-        else if ((pacman[1]>ghosts[i+1]) && ((ghosts[i+1]+1)=="o"))
+        else if ((pacman[1]>ghosts[i+1]) && ((ghosts[i+1]+1)=='o'))
         {
             ghosts[i+1] += 1;
             board[temp1][temp2] = 'o';
@@ -211,14 +215,14 @@ void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
             continue;
         }
         /*Same Column*/
-        if ((pacman[0]<ghosts[i]) && ((ghosts[i]-1)=="o"))
+        if ((pacman[0]<ghosts[i]) && ((ghosts[i]-1)=='o'))
         {    
             ghosts[i] -= 1;
             board[temp1][temp2] = 'o';
-            board[ghosts[i]][temp] = "g";
+            board[ghosts[i]][temp] = 'g';
             continue;
         }
-        else if ((pacman[0]>ghosts[i]) && ((ghosts[i]+1)=="o"))
+        else if ((pacman[0]>ghosts[i]) && ((ghosts[i]+1)=='o'))
         {
             ghosts[i] += 1;
             board[temp1][temp2] = 'o';
