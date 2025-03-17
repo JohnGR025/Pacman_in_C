@@ -10,7 +10,7 @@
 /*Functions Prototypes*/
 void area(char board[][19], int ghosts[], int num);
 void preparing_board(char board[][19], int ghosts[], int pacman[], int num);
-void move_pacman(char board[][19],int pacman[]);
+void move_pacman(char board[][19],int pacman[], int* moves);
 void move_ghosts(char board[][19], int ghosts[], int pacman[], int num);
 int alive(int pacman[], int ghosts[], int num);
 
@@ -20,6 +20,7 @@ int main(void)
     /*Variables Declaration*/
     /*Useful stuff*/
     int option, difficulty=2, moves=0;
+    char ch;
     /*The characters*/
     int ghosts[6], pacman[2]={7, 9};
     /*The Board Game*/
@@ -50,6 +51,7 @@ int main(void)
             printf("Choose an option: ");
             scanf("%d", &option);
         } while (option<1 || option>3);
+        while (((ch = getchar()) != '\n') && (ch != EOF)); /*Flush the Buffer*/
 
         switch (option)
         {
@@ -60,7 +62,7 @@ int main(void)
             do
             {
                 area(board, ghosts, difficulty);
-                move_pacman(board, pacman);
+                move_pacman(board, pacman, &moves);
                 if (!alive(pacman, ghosts, difficulty))
                     break;
                 move_ghosts(board, ghosts, pacman, difficulty);
@@ -96,7 +98,7 @@ void area(char board[][19], int ghosts[], int num)
             switch (board[i][j])
             {
             case 'b':
-                printf("%c", '%');
+                printf("%c", '#');
             break;
 
             case 'o':
@@ -136,14 +138,15 @@ void preparing_board(char board[][19], int ghosts[], int pacman[], int num)
     
 }
 
-void move_pacman(char board[][19], int pacman[])
+void move_pacman(char board[][19], int pacman[], int* moves)
 {
-    char move;
+    char move, ch;
     int flag=1, temp1=pacman[0], temp2=pacman[1];
     do
     {
         printf("Give direction (w,a,s,d): ");
         scanf("%c", &move);
+        while (((ch = getchar()) != '\n') && (ch != EOF)); /*Flush the Buffer*/
         if ((move=='w') || (move=='a') || (move=='s') || (move=='d'))
             flag = 0;
         
@@ -154,32 +157,50 @@ void move_pacman(char board[][19], int pacman[])
     case 'w': /*Up*/
         if (pacman[0]-1>0)
             if (board[pacman[0]-1][pacman[1]]!='b')
+            {
                 pacman[0]--;
+                (*moves)++;
+            }
     break;
     
     case 'a': /*Left*/
         if (pacman[1]-1>=0)
         {
             if (board[pacman[0]][pacman[1]-1]=='t')
-                pacman[1] = 17;
+                {
+                    pacman[1] = 17;
+                    (*moves)++;
+                }
             else if (board[pacman[0]][pacman[1]-1]!='b')
-                pacman[1]--;
+                {
+                    pacman[1]--;
+                    (*moves)++;
+                }
         }
     break;
 
     case 's': /*Down*/
         if (pacman[0]+1<ROWS)
             if (board[pacman[0]+1][pacman[1]]!='b')
-               pacman[0]++;
+            {
+                pacman[0]++;
+                (*moves)++;
+            }
     break;
 
     case 'd': /*Right*/
         if (pacman[1]+1<=COLS)
         {
             if (board[pacman[0]][pacman[1]+1]=='t')
+            {
                 pacman[1] = 1;
+                (*moves)++;
+            }
             else if (board[pacman[0]][pacman[1]+1]!='b')
+            {
                 pacman[1]++;
+                (*moves)++;
+            }
         }
     break;
     }
