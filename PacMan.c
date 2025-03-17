@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <conio.h> /*Windows-specific for keyboard input*/
+#include <windows.h> /*For Sleep function*/
 
 /*Constants*/
 #define ROWS 11
@@ -58,14 +60,19 @@ int main(void)
         case 1: /*PLay*/
             /*Printing the game board*/
             preparing_board(board, ghosts, pacman, difficulty);
+            system("cls");
+            printf("\n*****PAC MAN*****\n");
 
             do
             {
+                printf("\n*****PAC MAN*****\n");
                 area(board);
                 move_pacman(board, pacman, &moves);
                 if (!alive(pacman, ghosts, difficulty))
                     break;
                 move_ghosts(board, ghosts, pacman, difficulty);
+
+                system("cls"); /*Clear screen for next frame*/
             } while (alive(pacman, ghosts, difficulty));
             
             printf("You Died!!!\n");
@@ -76,13 +83,13 @@ int main(void)
             {
                 printf("Choose difficulty: ");
                 scanf("%d", &difficulty);
-            } while (difficulty<1 || difficulty>3);
+            } while (difficulty<1 || difficulty>4);
             printf("\n");
         break;
         }
     } while (option!=3);
 
-    printf("You manage to move %d\n", moves);
+    printf("You manage to move %d times\n", moves);
     return 0;
 }
 
@@ -91,9 +98,9 @@ void area(char board[][19])
 {
     int i, j;
 
-    for (i = 0; i < 11; i++)
+    for (i = 0; i < ROWS; i++)
     {
-        for (j = 0; j < 19; j++)
+        for (j = 0; j < COLS; j++)
         {
             switch (board[i][j])
             {
@@ -142,15 +149,21 @@ void move_pacman(char board[][19], int pacman[], int* moves)
 {
     char move, ch;
     int flag=1, temp1=pacman[0], temp2=pacman[1];
+
     do
     {
-        printf("Give direction (w,a,s,d): ");
-        scanf("%c", &move);
-        while (((ch = getchar()) != '\n') && (ch != EOF)); /*Flush the Buffer*/
-        if ((move=='w') || (move=='a') || (move=='s') || (move=='d'))
-            flag = 0;
-        
-    } while (flag);
+        printf("\nChoose a direction (a,s,d,w) or 'q' to quit:");
+        /* Wait for a key press */
+        while (!_kbhit()) /*No delay between checks to respond immediately to input*/
+            Sleep(10); /*Small delay to prevent CPU hogging*/
+
+        move = _getch(); /*Get the key press*/
+        if (move == 'q') /* Quit option */ 
+        {
+            printf("\nQuitting game...\n");
+            return;
+        }
+    } while (!((move=='w') || (move=='a') || (move=='s') || (move=='d')));
     
     switch (move)
     {
@@ -218,6 +231,7 @@ void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
     {
         temp1 = ghosts[i];
         temp2 = ghosts[i+1];
+
         /*Chase Sequence*/
         /*Move towards pacman*/
         /*Same Row*/
@@ -256,9 +270,9 @@ void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
         {
             flag = 0;
 
-            move = rand()%2;
-            direction = (rand()%3)-1;
-            temp = ghosts[move+i]+direction;
+            move = rand()%2; /*move a tile (for move=1) or not (for move=0)*/
+            direction = (rand()%3)-1; /*move accordingly to move (forward or backward)*/
+            temp = ghosts[move+i]+direction; /*store the updated movement*/
 
             if (move==0)
             {
@@ -295,7 +309,7 @@ void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
 int alive(int pacman[], int ghosts[], int num)
 {
     int i;
-    for (i = 0; i < num*2; i++)
+    for (i = 0; i < num*2; i+=2)
         if ((pacman[0]==ghosts[i]) && (pacman[1]==ghosts[i+1]))
             return 0; 
     
