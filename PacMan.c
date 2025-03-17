@@ -8,7 +8,7 @@
 #define COLS 19
 
 /*Functions Prototypes*/
-void area(char board[][19], int ghosts[], int num);
+void area(char board[][19]);
 void preparing_board(char board[][19], int ghosts[], int pacman[], int num);
 void move_pacman(char board[][19],int pacman[], int* moves);
 void move_ghosts(char board[][19], int ghosts[], int pacman[], int num);
@@ -61,7 +61,7 @@ int main(void)
 
             do
             {
-                area(board, ghosts, difficulty);
+                area(board);
                 move_pacman(board, pacman, &moves);
                 if (!alive(pacman, ghosts, difficulty))
                     break;
@@ -87,7 +87,7 @@ int main(void)
 }
 
 /*Function Factory*/
-void area(char board[][19], int ghosts[], int num)
+void area(char board[][19])
 {
     int i, j;
 
