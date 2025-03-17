@@ -61,7 +61,6 @@ int main(void)
             /*Printing the game board*/
             preparing_board(board, ghosts, pacman, difficulty);
             system("cls");
-            printf("\n*****PAC MAN*****\n");
 
             do
             {
