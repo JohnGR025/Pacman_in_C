@@ -71,7 +71,7 @@ int main(void)
                     break;
                 move_ghosts(board, ghosts, pacman, difficulty);
 
-                system("cls"); /*Clear screen for next frame*/
+                //system("cls"); /*Clear screen for next frame*/
             } while (alive(pacman, ghosts, difficulty));
             
             printf("You Died!!!\n");
@@ -218,7 +218,6 @@ void move_pacman(char board[][19], int pacman[], int* moves)
     }
     board[temp1][temp2] = 'o';
     board[pacman[0]][pacman[1]] = 'p';
-    printf("Row: %d\nCol: %d\n", pacman[0], pacman[1]);
 }
 
 void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
@@ -226,42 +225,47 @@ void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
     int i, move, direction, flag, temp;
     int temp1, temp2;
 
-    for (i = 0; i < num*2; i+=2)
+    for (i = 0; i < (num*2); i+=2)
     {
         temp1 = ghosts[i];
         temp2 = ghosts[i+1];
 
-        /*Chase Sequence*/
-        /*Move towards pacman*/
+        /*Chase Sequence (Move towards pacman)*/
         /*Same Row*/
-        if ((pacman[1]<ghosts[i+1]) && ((ghosts[i+1]-1)=='o'))
-        {    
-            ghosts[i+1] -= 1;
-            board[temp1][temp2] = 'o';
-            board[temp][ghosts[i+1]] = 'g';
-            continue;
-        }
-        else if ((pacman[1]>ghosts[i+1]) && ((ghosts[i+1]+1)=='o'))
+        if ((pacman[0]==ghosts[i]))
         {
-            ghosts[i+1] += 1;
-            board[temp1][temp2] = 'o';
-            board[temp][ghosts[i+1]] = 'g';
-            continue;
+            if ((pacman[1]<ghosts[i+1]) && (ghosts[i+1]-1)=='o') /*pacman left than ghost*/
+            {
+                ghosts[i+1] -= 1;
+                board[temp1][temp2] = 'o';
+                board[temp][ghosts[i+1]] = 'g';
+                continue;
+            }
+            else if ((pacman[1]>ghosts[i+1]) && (ghosts[i+1]+1)=='o') /*pacman right than ghost*/
+            {
+                ghosts[i+1] += 1;
+                board[temp1][temp2] = 'o';
+                board[temp][ghosts[i+1]] = 'g';
+                continue;
+            }
         }
-        /*Same Column*/
-        if ((pacman[0]<ghosts[i]) && ((ghosts[i]-1)=='o'))
-        {    
-            ghosts[i] -= 1;
-            board[temp1][temp2] = 'o';
-            board[ghosts[i]][temp] = 'g';
-            continue;
-        }
-        else if ((pacman[0]>ghosts[i]) && ((ghosts[i]+1)=='o'))
-        {
-            ghosts[i] += 1;
-            board[temp1][temp2] = 'o';
-            board[ghosts[i]][temp] = 'g';
-            continue;
+        /*Same Colm*/
+        if ((pacman[1]==ghosts[i+1]))
+        {   
+            if ((pacman[0]<ghosts[i]) && ((ghosts[i]+1)=='o')) /*pacman down than ghost*/
+            {
+                ghosts[i] += 1;
+                board[temp1][temp2] = 'o';
+                board[ghosts[i]][temp] = 'g';
+                continue;
+            }
+            else if ((pacman[0]>ghosts[i]) && ((ghosts[i]-1)=='o')) /*pacman up than ghost*/
+            {
+                ghosts[i] -= 1;
+                board[temp1][temp2] = 'o';
+                board[ghosts[i]][temp] = 'g';
+                continue;
+            }
         }
         
         /*Movement*/
@@ -269,9 +273,9 @@ void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
         {
             flag = 0;
 
-            move = rand()%2; /*move a tile (for move=1) or not (for move=0)*/
-            direction = (rand()%3)-1; /*move accordingly to move (forward or backward)*/
-            temp = ghosts[move+i]+direction; /*store the updated movement*/
+            move = rand()%2; /*Move a tile (for move=1) or not (for move=0)*/
+            direction = (rand()%3)-1; /*Move accordingly to move (forward or backward)*/
+            temp = ghosts[move+i]+direction; /*Store the updated movement*/
 
             if (move==0)
             {
