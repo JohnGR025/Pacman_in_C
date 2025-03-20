@@ -288,16 +288,16 @@ void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
         /*Same Colm*/
         if ((pacman[1]==ghosts[i+1]))
         {   
-            if ((pacman[0]<ghosts[i]) && ((ghosts[i]+1)=='o')) /*pacman down than ghost*/
+            if ((pacman[0]<ghosts[i]) && ((ghosts[i]-1)=='o')) /*pacman down than ghost*/
             {
-                ghosts[i] += 1;
+                ghosts[i] -= 1;
                 board[temp1][temp2] = 'o';
                 board[ghosts[i]][temp] = 'g';
                 continue;
             }
-            else if ((pacman[0]>ghosts[i]) && ((ghosts[i]-1)=='o')) /*pacman up than ghost*/
+            else if ((pacman[0]>ghosts[i]) && ((ghosts[i]+1)=='o')) /*pacman up than ghost*/
             {
-                ghosts[i] -= 1;
+                ghosts[i] += 1;
                 board[temp1][temp2] = 'o';
                 board[ghosts[i]][temp] = 'g';
                 continue;
