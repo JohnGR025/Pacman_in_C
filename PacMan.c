@@ -11,17 +11,17 @@
 
 /*Functions Prototypes*/
 void area(char board[][19]);
-void preparing_board(char board[][19], int ghosts[], int pacman[], int num, int* round);
+void preparing_board(char board[][19], int ghosts[], int pacman[], int difficulty, int fruits, int* round);
 void move_pacman(char board[][19],int pacman[], int* moves, int* fruits);
-void move_ghosts(char board[][19], int ghosts[], int pacman[], int num);
-int alive(int pacman[], int ghosts[], int num, int* fruits);
+void move_ghosts(char board[][19], int ghosts[], int pacman[], int difficulty);
+int alive(int pacman[], int ghosts[], int difficulty, int* fruits);
 
 int main(void)
 {
     srand(time(NULL));
     /*Variables Declaration*/
     /*Useful stuff*/
-    int option, difficulty=2, rounds=0, moves, fruits;
+    int option, difficulty=2, rounds=0, moves, fruits=4;
     char ch;
     /*The characters*/
     int ghosts[6], pacman[2]={7, 9};
@@ -89,6 +89,7 @@ int main(void)
                 printf("Choose difficulty: ");
                 scanf("%d", &difficulty);
             } while (difficulty<1 || difficulty>4);
+            fruits = 2*difficulty;
             printf("\n");
         break;
         }
@@ -141,16 +142,20 @@ void area(char board[][19])
     
 }
 
-void preparing_board(char board[][19], int ghosts[], int pacman[], int num, int* round)
+void preparing_board(char board[][19], int ghosts[], int pacman[], int difficulty, int fruits, int* round)
 {
-    int i;
+    int i, j, temp1, temp2;
 
     /*Reset after the first game*/
     board[pacman[0]][pacman[1]] = 'o'; /*Pacman Position*/
-    board[1][1] = 'O'; /*Top-Left Fruit*/
-    board[1][COLS-2] = 'O'; /*Top-Right Fruit*/
-    board[ROWS-2][1] = 'O'; /*Bottom-Left Fruit*/
-    board[ROWS-2][COLS-2] = 'O'; /*Bottom-Right Fruit*/
+    for (i=0;i<ROWS;i++)
+    {
+        for (j=0;j<COLS;j++)
+        {
+            if (board[i][j]=='O')
+                board[i][j] = 'o';
+        }
+    }
     if ((*round)!=0) /*Ghosts previous positions termination*/
     {
         for (i = 0;i < num*2; i+=2)
@@ -158,18 +163,30 @@ void preparing_board(char board[][19], int ghosts[], int pacman[], int num, int*
     }
 
     /*Ghost Positions*/
-    for (i = 0; i < num*2; i+=2)
+    for (i = 0; i < difficulty*2; i+=2)
     {
         do
         {
             ghosts[i] = rand()%ROWS;
             ghosts[i+1] = rand()%COLS;
-        } while ((board[ghosts[i]][ghosts[i+1]]=='b') || (ghosts[i]==7) || (ghosts[i+1]==9));
+        } while (!(board[ghosts[i]][ghosts[i+1]]=='o'));
         board[ghosts[i]][ghosts[i+1]] = 'g';
     }
+    /*Fruits Positions*/
+    for (i=0;i<fruits;i++)
+    {
+        do
+        {
+            temp1 = rand()%ROWS;
+            temp2 = rand()%COLS;
+        } while (!(board[temp1][temp2]=='o'));
+    }
+    board[temp1][temp2] = 'O';
+    
+    /*Pacman Reset Position*/
     pacman[0] = 7;
     pacman[1] = 9;
-    board[pacman[0]][pacman[1]] = 'p'; /*Pacman Position*/
+    board[pacman[0]][pacman[1]] = 'p';
 }
 
 void move_pacman(char board[][19], int pacman[], int* moves, int* fruits)
@@ -256,12 +273,12 @@ void move_pacman(char board[][19], int pacman[], int* moves, int* fruits)
     board[pacman[0]][pacman[1]] = 'p';
 }
 
-void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
+void move_ghosts(char board[][19], int ghosts[], int pacman[], int difficulty)
 {
     int i, move, direction, flag, temp;
     int temp1, temp2;
 
-    for (i = 0; i < (num*2); i+=2)
+    for (i = 0; i < (difficulty*2); i+=2)
     {
         temp1 = ghosts[i];
         temp2 = ghosts[i+1];
@@ -345,10 +362,10 @@ void move_ghosts(char board[][19], int ghosts[], int pacman[], int num)
     }
 }
 
-int alive(int pacman[], int ghosts[], int num, int* fruits)
+int alive(int pacman[], int ghosts[], int difficulty, int* fruits)
 {
     int i;
-    for (i = 0; i < num*2; i+=2)
+    for (i = 0; i < difficulty*2; i+=2)
         if (((pacman[0]==ghosts[i]) && (pacman[1]==ghosts[i+1])) || ((*fruits)==0))
             return 0;
     
