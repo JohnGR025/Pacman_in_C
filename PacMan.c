@@ -11,8 +11,8 @@
 
 /*Functions Prototypes*/
 void area(char board[][19]);
-void preparing_board(char board[][19], int ghosts[], int pacman[], int difficulty, int fruits, int* round);
-void move_pacman(char board[][19],int pacman[], int* moves, int* fruits);
+void preparing_board(char board[][19], int ghosts[], int pacman[], int difficulty, int* fruits, int* round);
+int move_pacman(char board[][19],int pacman[], int* moves, int* fruits);
 void move_ghosts(char board[][19], int ghosts[], int pacman[], int difficulty);
 int alive(int pacman[], int ghosts[], int difficulty, int* fruits);
 
@@ -63,14 +63,16 @@ int main(void)
             fruits = 4;
 
             /*Printing the game board*/
-            preparing_board(board, ghosts, pacman, difficulty, &rounds);
+            preparing_board(board, ghosts, pacman, difficulty, &fruits, &rounds);
             system("cls"); /*Clear the screen*/
 
             do
             {
                 printf("\n*****PAC MAN*****\n");
                 area(board);
-                move_pacman(board, pacman, &moves, &fruits);
+                if (!move_pacman(board, pacman, &moves, &fruits))
+                    break;
+
                 if (!alive(pacman, ghosts, difficulty, &fruits))
                     break;
                 move_ghosts(board, ghosts, pacman, difficulty);
@@ -81,6 +83,10 @@ int main(void)
                 printf("\nYou Died!!!\n");
             else
                 printf("\nYou PASSED the level\n");
+            /*End of round*/
+            printf("Moves made: %d\n", moves);
+            printf("Fruits eaten: %d\n\n", 4-fruits);
+            rounds++;
         break;
         
         case 2: /*Settings*/
@@ -94,12 +100,9 @@ int main(void)
         break;
         }
 
-        /*End of round*/
-        printf("Moves made: %d\n", moves);
-        printf("Fruits eaten: %d\n\n", 4-fruits);
-        rounds++;
-
     } while (option!=3);
+
+    printf("Rounds played: %d\n", rounds);
 
     return 0;
 }
@@ -142,7 +145,7 @@ void area(char board[][19])
     
 }
 
-void preparing_board(char board[][19], int ghosts[], int pacman[], int difficulty, int fruits, int* round)
+void preparing_board(char board[][19], int ghosts[], int pacman[], int difficulty, int* fruits, int* round)
 {
     int i, j, temp1, temp2;
 
@@ -158,7 +161,7 @@ void preparing_board(char board[][19], int ghosts[], int pacman[], int difficult
     }
     if ((*round)!=0) /*Ghosts previous positions termination*/
     {
-        for (i = 0;i < num*2; i+=2)
+        for (i = 0;i < difficulty*2; i+=2)
             board[ghosts[i]][ghosts[i+1]] = 'o';
     }
 
@@ -173,15 +176,15 @@ void preparing_board(char board[][19], int ghosts[], int pacman[], int difficult
         board[ghosts[i]][ghosts[i+1]] = 'g';
     }
     /*Fruits Positions*/
-    for (i=0;i<fruits;i++)
+    for (i=0;i<(*fruits);i++)
     {
         do
         {
             temp1 = rand()%ROWS;
             temp2 = rand()%COLS;
         } while (!(board[temp1][temp2]=='o'));
+        board[temp1][temp2] = 'O';
     }
-    board[temp1][temp2] = 'O';
     
     /*Pacman Reset Position*/
     pacman[0] = 7;
@@ -189,7 +192,7 @@ void preparing_board(char board[][19], int ghosts[], int pacman[], int difficult
     board[pacman[0]][pacman[1]] = 'p';
 }
 
-void move_pacman(char board[][19], int pacman[], int* moves, int* fruits)
+int move_pacman(char board[][19], int pacman[], int* moves, int* fruits)
 {
     char move, ch;
     int flag=1, temp1=pacman[0], temp2=pacman[1];
@@ -204,8 +207,8 @@ void move_pacman(char board[][19], int pacman[], int* moves, int* fruits)
         move = _getch(); /*Get the key press*/
         if (move == 'q') /* Quit option */ 
         {
-            printf("\nQuitting game...\n");
-            return;
+            printf("\nYou quit the game\n");
+            return 0; /*Exit the round*/
         }
     } while (!((move=='w') || (move=='a') || (move=='s') || (move=='d')));
     
@@ -271,6 +274,7 @@ void move_pacman(char board[][19], int pacman[], int* moves, int* fruits)
     }
     board[temp1][temp2] = 'o';
     board[pacman[0]][pacman[1]] = 'p';
+    return 1;
 }
 
 void move_ghosts(char board[][19], int ghosts[], int pacman[], int difficulty)
