@@ -67,11 +67,12 @@ int main(void)
             {
                 printf("\n*****PAC MAN*****\n");
                 area(board);
-                if (!move_pacman(board, pacman, &moves, &fruits))
+                if (!move_pacman(board, pacman, &moves, &fruits)) /*checks for quit-pressing command*/
                     break;
 
-                if (!alive(pacman, ghosts, difficulty, &fruits))
+                if (!alive(pacman, ghosts, difficulty, &fruits)) /*checks viatals for pacman*/
                     break;
+
                 move_ghosts(board, ghosts, pacman, difficulty);
 
                 //system("cls"); /*Clear screen for next frame*/
