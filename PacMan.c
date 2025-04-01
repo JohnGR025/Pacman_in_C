@@ -21,7 +21,7 @@ int main(void)
     srand(time(NULL));
     /*Variables Declaration*/
     /*Useful stuff*/
-    int option, difficulty=2, rounds=0, moves, fruits=4;
+    int option, difficulty=2, rounds=0, moves=0, fruits=0, max_fruits=4;
     char ch;
     /*The characters*/
     int ghosts[6], pacman[2]={7, 9};
@@ -59,9 +59,6 @@ int main(void)
         {
         case 1: /*PLay*/
 
-            moves = 0;
-            fruits = 4;
-
             /*Printing the game board*/
             preparing_board(board, ghosts, pacman, difficulty, &fruits, &rounds);
             system("cls"); /*Clear the screen*/
@@ -79,13 +76,24 @@ int main(void)
 
                 //system("cls"); /*Clear screen for next frame*/
             } while (alive(pacman, ghosts, difficulty, &fruits));
-            if (fruits!=0)
+            if (fruits!=max_fruits)
+            {
                 printf("\nYou Died!!!\n");
+                printf("Moves made: %d\n", moves);
+                printf("Fruits eaten: %d\n\n", fruits);
+                fruits = 0;
+                moves = 0;
+            }
             else
+            {
                 printf("\nYou PASSED the level\n");
+                printf("Moves made: %d\n", moves);
+                printf("Fruits eaten: %d\n\n", fruits);
+                difficulty++;
+                max_fruits += 2;
+                moves = 0;
+            }
             /*End of round*/
-            printf("Moves made: %d\n", moves);
-            printf("Fruits eaten: %d\n\n", 4-fruits);
             rounds++;
         break;
         
@@ -95,7 +103,7 @@ int main(void)
                 printf("Choose difficulty: ");
                 scanf("%d", &difficulty);
             } while (difficulty<1 || difficulty>4);
-            fruits = 2*difficulty;
+            max_fruits = 2*difficulty;
             printf("\n");
         break;
         }
@@ -291,36 +299,36 @@ void move_ghosts(char board[][19], int ghosts[], int pacman[], int difficulty)
         /*Same Row*/
         if ((pacman[0]==ghosts[i]))
         {
-            if ((pacman[1]<ghosts[i+1]) && (ghosts[i+1]-1)=='o') /*pacman left than ghost*/
+            if ((pacman[1]<ghosts[i+1]) && (board[temp1][ghosts[i+1]-1]=='o')) /*pacman left than ghost*/
             {
                 ghosts[i+1] -= 1;
                 board[temp1][temp2] = 'o';
-                board[temp][ghosts[i+1]] = 'g';
+                board[temp1][ghosts[i+1]] = 'g';
                 continue;
             }
-            else if ((pacman[1]>ghosts[i+1]) && (ghosts[i+1]+1)=='o') /*pacman right than ghost*/
+            else if ((pacman[1]>ghosts[i+1]) && (board[temp1][ghosts[i+1]+1]=='o')) /*pacman right than ghost*/
             {
                 ghosts[i+1] += 1;
                 board[temp1][temp2] = 'o';
-                board[temp][ghosts[i+1]] = 'g';
+                board[temp1][ghosts[i+1]] = 'g';
                 continue;
             }
         }
         /*Same Colm*/
         if ((pacman[1]==ghosts[i+1]))
         {   
-            if ((pacman[0]<ghosts[i]) && ((ghosts[i]-1)=='o')) /*pacman down than ghost*/
+            if ((pacman[0]<ghosts[i]) && (board[ghosts[i]-1][temp2]=='o')) /*pacman down than ghost*/
             {
                 ghosts[i] -= 1;
                 board[temp1][temp2] = 'o';
-                board[ghosts[i]][temp] = 'g';
+                board[ghosts[i]][temp2] = 'g';
                 continue;
             }
-            else if ((pacman[0]>ghosts[i]) && ((ghosts[i]+1)=='o')) /*pacman up than ghost*/
+            else if ((pacman[0]>ghosts[i]) && (board[ghosts[i]+1][temp2]=='o')) /*pacman up than ghost*/
             {
                 ghosts[i] += 1;
                 board[temp1][temp2] = 'o';
-                board[ghosts[i]][temp] = 'g';
+                board[ghosts[i]][temp2] = 'g';
                 continue;
             }
         }
@@ -356,7 +364,7 @@ void move_ghosts(char board[][19], int ghosts[], int pacman[], int difficulty)
                     flag = 1;
         } while (flag);
 
-        /*Finilizing the changes (movements)*/
+        /*Finilizing the changes of the random movements*/
         ghosts[move+i] += direction;
         board[temp1][temp2] = 'o';
         if (move==0)
@@ -370,7 +378,7 @@ int alive(int pacman[], int ghosts[], int difficulty, int* fruits)
 {
     int i;
     for (i = 0; i < difficulty*2; i+=2)
-        if (((pacman[0]==ghosts[i]) && (pacman[1]==ghosts[i+1])) || ((*fruits)==0))
+        if (((pacman[0]==ghosts[i]) && (pacman[1]==ghosts[i+1])))
             return 0;
     
     return 1;
