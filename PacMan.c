@@ -2,8 +2,56 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <conio.h> /*Windows-specific for keyboard input*/
-#include <windows.h> /*For Sleep function*/
+
+/*Cross-platform input and sleep*/
+#ifdef _WIN32
+    #include <conio.h>
+    #include <windows.h>
+    #define SLEEP_MS(ms) Sleep(ms)
+    #define CLEAR_SCREEN() system("cls")
+#else
+    #include <termios.h>
+    #include <unistd.h>
+    #include <fcntl.h>
+    #define SLEEP_MS(ms) usleep((ms) * 1000)
+    #define CLEAR_SCREEN() system("clear")
+
+    /* Replicate _kbhit() for Linux */
+    static int _kbhit(void)
+    {
+        struct termios oldt, newt;
+        int ch, oldf;
+        tcgetattr(STDIN_FILENO, &oldt);
+        newt = oldt;
+        newt.c_lflag &= ~(ICANON | ECHO);
+        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+        oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+        fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+        ch = getchar();
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+        fcntl(STDIN_FILENO, F_SETFL, oldf);
+        if (ch != EOF)
+        {
+            ungetc(ch, stdin);
+            return 1;
+        }
+        return 0;
+    }
+
+    /* Replicate _getch() for Linux: read one char without echo */
+    static int _getch(void)
+    {
+        struct termios oldt, newt;
+        int ch;
+        tcgetattr(STDIN_FILENO, &oldt);
+        newt = oldt;
+        newt.c_lflag &= ~(ICANON | ECHO);
+        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+        ch = getchar();
+        tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+        return ch;
+    }
+#endif
 
 /*Constants*/
 #define ROWS 11
@@ -61,7 +109,7 @@ int main(void)
 
             /*Printing the game board*/
             preparing_board(board, ghosts, pacman, difficulty, &fruits, &rounds);
-            system("cls"); /*Clear the screen*/
+            CLEAR_SCREEN();
 
             do
             {
@@ -75,7 +123,6 @@ int main(void)
 
                 move_ghosts(board, ghosts, pacman, difficulty);
 
-                //system("cls"); /*Clear screen for next frame*/
             } while (alive(pacman, ghosts, difficulty, &fruits));
             if (fruits!=max_fruits)
             {
@@ -203,15 +250,15 @@ void preparing_board(char board[][19], int ghosts[], int pacman[], int difficult
 
 int move_pacman(char board[][19], int pacman[], int* moves, int* fruits)
 {
-    char move, ch;
-    int flag=1, temp1=pacman[0], temp2=pacman[1];
+    char move;
+    int temp1=pacman[0], temp2=pacman[1];
 
     do
     {
         printf("\nChoose a direction (a,s,d,w) or 'q' to quit:");
         /* Wait for a key press */
-        while (!_kbhit()) /*No delay between checks to respond immediately to input*/
-            Sleep(10); /*Small delay to prevent CPU hogging*/
+        while (!_kbhit())
+            SLEEP_MS(10); /*Small delay to prevent CPU hogging*/
 
         move = _getch(); /*Get the key press*/
         if (move == 'q') /* Quit option */ 
